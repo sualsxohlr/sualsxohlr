@@ -49,3 +49,11 @@ Session.vim
 
 # Visual Studio
 .vs
+
+
+#######
+!Common/**
+!ohlrxsuals_server/**
+ohlrxsuals_server/.vs/
+ohlrxsuals_server/Server/x64/
+ohlrxsuals_server/ServerCore/x64/
