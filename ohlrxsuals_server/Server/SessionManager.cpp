@@ -33,3 +33,9 @@ void SessionManager::RemoveClient(int id)
 	clients.erase(id);
 	m_lock.unlock();
 }
+
+void SessionManager::Broadcast(void* packet)
+{
+	for (auto& c : clients)
+		c.second->SendPacket(packet);
+}

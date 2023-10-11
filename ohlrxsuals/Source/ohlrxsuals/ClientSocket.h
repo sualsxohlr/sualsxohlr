@@ -5,17 +5,16 @@
 #include "CoreMinimal.h"
 
 #include "../../../Common/protocol.h"
+#include "HAL/Runnable.h"
 
 #ifndef USE_FSOCKET
-
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <MSWSock.h>
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
 
-enum COMP_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_DB_LOGIN_WITH_INFO, OP_DB_LOGIN_NO_INFO, OP_DB_UPDATE, OP_PLAYER_HEAL, OP_RESPAWN_NPC, OP_NPC_AI };
-
+enum COMP_TYPE { OP_ACCEPT, OP_RECV, OP_SEND};
 class EXP_OVER
 {
 public:
@@ -47,10 +46,15 @@ public:
  * 
  */
 
-class OHLRXSUALS_API ClientSocket
+class OHLRXSUALS_API ClientSocket : public FRunnable
 {
 public:
 	ClientSocket();
+	virtual ~ClientSocket();
+
+	virtual uint32 Run() override;
+	virtual void Stop() override;
+	virtual void Exit() override;
 
 	bool Connect();
 	void CleanUp();
@@ -63,6 +67,8 @@ private:
 #else
 	SOCKET m_socket;
 	EXP_OVER m_over;
-	int m_prev_remain;
+
 #endif
+	FRunnableThread* m_thread = nullptr;
+	bool m_bStopThread = false;
 };

@@ -10,6 +10,7 @@ public:
 	void RemoveClient(int id);
 
 	unordered_map<int, shared_ptr<Session>> GetClients() { return clients; }
+	void Broadcast(void* packet);
 
 private:
 	unordered_map<int, shared_ptr<Session>> clients;

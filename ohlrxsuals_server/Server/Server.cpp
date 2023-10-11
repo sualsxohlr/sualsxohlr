@@ -111,7 +111,6 @@ void Server::DoWorker()
 
 void Server::ProcessAccept()
 {
-	cout << "Process Accept" << endl;
 	int new_id = m_client_id++;
 	shared_ptr<Session> session = make_shared<Session>();
 	session->ProcessConnect(new_id, m_client_socket);
@@ -126,6 +125,7 @@ void Server::ProcessAccept()
 
 void Server::ProcessRecv(EXP_OVER* exp_over, ULONG_PTR num_bytes, int client_id)
 {
+	cout << "Received" << endl;
 	shared_ptr<Session> session = SessionManager::GetInstance()->FindClient(client_id);
 	PacketManager::GetInstance()->ProcessPacket(session->shared_from_this(), exp_over->sendbuf, num_bytes);
 	session->RegisterRecv();

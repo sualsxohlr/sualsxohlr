@@ -5,3 +5,5 @@
 #include "CoreMinimal.h"
 
 //#define USE_FSOCKET
+
+// DECLARE_LOG_CATEGORY_EXTERN(LogSumin, Log, All);

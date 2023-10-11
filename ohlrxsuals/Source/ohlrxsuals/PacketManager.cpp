@@ -1,0 +1,60 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "PacketManager.h"
+//#include "ohlrxsuals.h"
+
+void PacketManager::Init()
+{
+	m_handlers.Add(PacketType::SC_LOGIN_INFO, *&SCLoginDelegate);
+	m_handlers.Add(PacketType::SC_MOVE_PLAYER, *&SCMovePlayerDelegate);
+
+	SCLoginDelegate.BindRaw(this, &PacketManager::SCLoginInfoHandler);
+	SCMovePlayerDelegate.BindRaw(this, &PacketManager::SCMovePlayerHandler);
+}
+
+void PacketManager::ProcessPacket(char* packet, size_t length)
+{
+	int data_to_process = static_cast<int>(length) + m_prev_data_size;
+	while (data_to_process > 0) {
+		int packet_size = packet[0];
+		if (packet_size > data_to_process) break;
+
+		PacketType packet_type = (PacketType)packet[1];
+		//m_handlers[packet_type].ExecuteIfBound(packet);
+		switch (packet_type) {
+		case PacketType::SC_LOGIN_INFO:
+			SCLoginDelegate.ExecuteIfBound(packet);
+			break;
+		case PacketType::SC_MOVE_PLAYER:
+			SCMovePlayerDelegate.ExecuteIfBound(packet);
+			break;
+		}
+
+		packet += packet_size;
+		data_to_process -= packet_size;
+	}
+	m_prev_data_size = data_to_process;
+	if (m_prev_data_size > 0) {
+		memcpy(m_remain_data, packet, m_prev_data_size);
+	}
+}
+
+void PacketManager::SCLoginInfoHandler(char* packet)
+{
+	SC_LOGIN_INFO_PACKET* p = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet);
+	uint32 id = p->id;
+	uint32 x = p->x;
+	uint32 y = p->y;
+	uint32 z = p->z;
+	UE_LOG(LogTemp, Log, TEXT("[Login Info] ID : %d , X : %d, Y : %d, Z: %d"), id, x, y, z);
+}
+
+void PacketManager::SCMovePlayerHandler(char* packet)
+{
+	SC_MOVE_PLAYER_PACKET* p = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(packet);
+	uint32 id = p->id;
+	uint32 x = p->x;
+	uint32 y = p->y;
+	uint32 z = p->z;
+	UE_LOG(LogTemp, Log, TEXT("[Move] ID : %d , X : %d, Y : %d, Z: %d"), id, x, y, z);
+}

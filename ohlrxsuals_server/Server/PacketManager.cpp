@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "PacketManager.h"
+#include "SessionManager.h"
 #include "Session.h"
 
 void PacketManager::Init()
@@ -38,10 +39,16 @@ void PacketManager::CSLoginHandler(shared_ptr<Session> session, char* packet)
 {
 	CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
 	session->m_name = p->name;
+	cout << session->m_name << " 이 로그인함" << endl;
 	
 	SC_LOGIN_INFO_PACKET loginPacket;
 	loginPacket.size = sizeof(SC_LOGIN_INFO_PACKET);
 	loginPacket.type = PacketType::SC_LOGIN_INFO;
+	loginPacket.id = session->m_id;
+	loginPacket.x = 0 + 100 * session->m_id;
+	loginPacket.y = 1 + 100 * session->m_id;
+	loginPacket.z = 2 + 100 * session->m_id;
 
-	session->SendPacket(&loginPacket);
+	//session->SendPacket(&loginPacket);
+	SessionManager::GetInstance()->Broadcast(&loginPacket);
 }
