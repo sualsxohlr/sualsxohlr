@@ -6,6 +6,8 @@
 void PacketManager::Init()
 {
 	BindHandler(PacketType::CS_LOGIN, &PacketManager::CSLoginHandler);
+	BindHandler(PacketType::CS_PLAYER_INFO, &PacketManager::CSPlayerInfoHandler);
+	BindHandler(PacketType::CS_DISCONNECT_PLAYER, &PacketManager::CSDisconnectPlayerHandler);
 }
 
 void PacketManager::BindHandler(PacketType type, void(PacketManager::* handler)(shared_ptr<Session>, char*))
@@ -52,4 +54,39 @@ void PacketManager::CSLoginHandler(shared_ptr<Session> session, char* packet)
 
 	//session->SendPacket(&loginPacket);
 	SessionManager::GetInstance()->Broadcast(&loginPacket);
+}
+
+void PacketManager::CSPlayerInfoHandler(shared_ptr<Session> session, char* packet)
+{
+	CS_PLAYER_INFO_PACKET* p = reinterpret_cast<CS_PLAYER_INFO_PACKET*>(packet);
+
+	SC_MOVE_PLAYER_PACKET pkt;
+	pkt.size = sizeof(SC_MOVE_PLAYER_PACKET);
+	pkt.type = PacketType::SC_MOVE_PLAYER;
+	pkt.id = session->m_id;
+
+	pkt.x = p->x;
+	pkt.y = p->y;
+	pkt.z = p->z;
+
+	pkt.yaw = p->yaw;
+	pkt.pitch = p->pitch;
+	pkt.roll = p->roll;
+
+	//session->SendPacket(&loginPacket);
+	SessionManager::GetInstance()->Broadcast(&pkt);
+}
+
+void PacketManager::CSDisconnectPlayerHandler(shared_ptr<Session> session, char* packet)
+{
+	CS_DISCONNECT_PLAYER_PACKET* p = reinterpret_cast<CS_DISCONNECT_PLAYER_PACKET*>(packet);
+	cout << session->m_id << " - Discooencted" << endl;
+
+	SC_REMOVE_PLAYER_PACKET pkt;
+	pkt.size = sizeof(SC_REMOVE_PLAYER_PACKET);
+	pkt.type = PacketType::SC_REMOVE_PLAYER;
+	pkt.id = session->m_id;
+
+	//session->SendPacket(&loginPacket);
+	SessionManager::GetInstance()->Broadcast(&pkt);
 }

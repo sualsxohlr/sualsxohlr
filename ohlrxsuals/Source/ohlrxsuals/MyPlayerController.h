@@ -24,7 +24,17 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
+	virtual void PostInitializeComponents() override;
+	virtual void OnPossess(APawn* aPawn) override;
+	virtual void SetupInputComponent() override;
+
+	void SetCharacter(ACharacter* character) { m_playerCharacter = character; }
+
 	void EnterPlayer(uint32 id, FVector location, FRotator rotator);
+
+	void OnGameExited();
+
+	void SendPlayerInfo();
 
 	void SCLoginInfoHandler(char* packet);
 	void SCMovePlayerHandler(char* packet);
@@ -33,6 +43,7 @@ public:
 	FD_HandlerDelegate SCLoginDelegate;
 	FD_HandlerDelegate SCMovePlayerDelegate;
 
-public:
+	class ACharacter* m_playerCharacter;
+
 	ClientSocket* m_socket;
 };

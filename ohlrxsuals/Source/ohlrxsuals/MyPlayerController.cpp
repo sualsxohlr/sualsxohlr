@@ -3,20 +3,22 @@
 #include "MyPlayerController.h"
 #include <Kismet/GameplayStatics.h>
 #include "PacketManager.h"
+#include "MyCharacter.h"
 
 AMyPlayerController::AMyPlayerController()
 {
+	UE_LOG(LogTemp, Log, TEXT("PlayerController"));
+
+	PacketManager::GetInstance()->SetPlayerController(this);
+
+	SCLoginDelegate.BindUObject(this, &AMyPlayerController::SCLoginInfoHandler);
+	SCMovePlayerDelegate.BindUObject(this, &AMyPlayerController::SCMovePlayerHandler);
 
 }
 
 void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	PacketManager::GetInstance()->SetPlayerController(this);
-
-	SCLoginDelegate.BindUObject(this, &AMyPlayerController::SCLoginInfoHandler);
-	SCMovePlayerDelegate.BindUObject(this, &AMyPlayerController::SCMovePlayerHandler);
 
 	m_socket = new ClientSocket();
 
@@ -31,12 +33,59 @@ void AMyPlayerController::BeginPlay()
 void AMyPlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	SendPlayerInfo();
+}
+
+void AMyPlayerController::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+}
+
+void AMyPlayerController::OnPossess(APawn* aPawn)
+{
+	Super::OnPossess(aPawn);
+}
+
+void AMyPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	InputComponent->BindAction(TEXT("Exit"), EInputEvent::IE_Pressed, this, &AMyPlayerController::OnGameExited);
+}
+
+void AMyPlayerController::OnGameExited()
+{
+	CS_DISCONNECT_PLAYER_PACKET p;
+	p.size = sizeof(CS_DISCONNECT_PLAYER_PACKET);
+	p.type = PacketType::CS_DISCONNECT_PLAYER;	
+	m_socket->SendPacket(&p);
+	// Broadcast
+}
+
+void AMyPlayerController::SendPlayerInfo()
+{
+	CS_PLAYER_INFO_PACKET p;
+	p.size = sizeof(CS_PLAYER_INFO_PACKET);
+	p.type = PacketType::CS_PLAYER_INFO;
+
+	FVector location = m_playerCharacter->GetActorLocation();
+	FRotator rotation = m_playerCharacter->GetActorRotation();
+	p.x = location.X;
+	p.y = location.Y;
+	p.z = location.Z;
+
+	p.yaw = rotation.Yaw;
+	p.pitch = rotation.Pitch;
+	p.roll = rotation.Roll;
+
+	m_socket->SendPacket(&p);
 }
 
 void AMyPlayerController::EnterPlayer(uint32 id, FVector location, FRotator rotation)
 {
-	//ACharacter* newPlayer = GetWorld()->SpawnActor<ACharacter>(location, rotation);
-	UE_LOG(LogTemp, Log, TEXT("id ½ºÆùµÊ !"), id);
+	//GetWorld()->SpawnActor<AMyCharacter>(location, rotation);
+	UE_LOG(LogTemp, Log, TEXT("id Spawned !"), id);
 }
 
 void AMyPlayerController::SCLoginInfoHandler(char* packet)
@@ -50,10 +99,11 @@ void AMyPlayerController::SCLoginInfoHandler(char* packet)
 	float yaw = p->yaw;
 	float pitch = p->pitch;
 	float roll = p->roll;
-	UE_LOG(LogTemp, Log, TEXT("[Login Info] ID : %d , X : %d, Y : %d, Z: %d"), id, x, y, z);
+	UE_LOG(LogTemp, Log, TEXT("[Login Info] ID : %d (%d, %d, %d) (%d, %d, %d)"), id, x, y, z, yaw, pitch, roll);
 
 	FVector location(x, y, z);
-	EnterPlayer(id, location, FRotator::ZeroRotator);
+	FRotator rotation(yaw, pitch, roll);
+	EnterPlayer(id, location, rotation);
 }
 
 void AMyPlayerController::SCMovePlayerHandler(char* packet)
@@ -69,5 +119,6 @@ void AMyPlayerController::SCMovePlayerHandler(char* packet)
 	float yaw = p->yaw;
 	float pitch = p->pitch;
 	float roll = p->roll;
-	UE_LOG(LogTemp, Log, TEXT("[Move] ID : %d , X : %d, Y : %d, Z: %d"), id, x, y, z);
+
+	UE_LOG(LogTemp, Log, TEXT("[Move] ID : %d (%d, %d, %d) (%d, %d, %d)"), id, x, y, z, yaw, pitch, roll);
 }

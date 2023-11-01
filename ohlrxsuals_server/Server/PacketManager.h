@@ -15,6 +15,9 @@ private:
 
 private:
 	void BindHandler(PacketType, void(PacketManager::* handler)(shared_ptr<Session>, char*));
-	void CSLoginHandler(shared_ptr<Session> session, char* packet);
+	
+	void CSLoginHandler(shared_ptr<Session> session, char* packet);	
+	void CSPlayerInfoHandler(shared_ptr<Session> session, char* packet);
+	void CSDisconnectPlayerHandler(shared_ptr<Session> session, char* packet);
 };
 
