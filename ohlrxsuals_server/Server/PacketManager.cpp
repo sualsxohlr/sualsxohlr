@@ -45,6 +45,7 @@ void PacketManager::CSLoginHandler(shared_ptr<Session> session, char* packet)
 	loginPacket.size = sizeof(SC_LOGIN_INFO_PACKET);
 	loginPacket.type = PacketType::SC_LOGIN_INFO;
 	loginPacket.id = session->m_id;
+
 	loginPacket.x = 0 + 100 * session->m_id;
 	loginPacket.y = 1 + 100 * session->m_id;
 	loginPacket.z = 2 + 100 * session->m_id;

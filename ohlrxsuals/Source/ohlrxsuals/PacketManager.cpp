@@ -5,11 +5,8 @@
 
 void PacketManager::Init()
 {
-	m_handlers.Add(PacketType::SC_LOGIN_INFO, *&SCLoginDelegate);
-	m_handlers.Add(PacketType::SC_MOVE_PLAYER, *&SCMovePlayerDelegate);
-
-	SCLoginDelegate.BindRaw(this, &PacketManager::SCLoginInfoHandler);
-	SCMovePlayerDelegate.BindRaw(this, &PacketManager::SCMovePlayerHandler);
+	//m_handlers.Add(PacketType::SC_LOGIN_INFO, *&SCLoginDelegate);
+	//m_handlers.Add(PacketType::SC_MOVE_PLAYER, *&SCMovePlayerDelegate);
 }
 
 void PacketManager::ProcessPacket(char* packet, size_t length)
@@ -23,10 +20,10 @@ void PacketManager::ProcessPacket(char* packet, size_t length)
 		//m_handlers[packet_type].ExecuteIfBound(packet);
 		switch (packet_type) {
 		case PacketType::SC_LOGIN_INFO:
-			SCLoginDelegate.ExecuteIfBound(packet);
+			m_playerController->SCLoginDelegate.ExecuteIfBound(packet);
 			break;
 		case PacketType::SC_MOVE_PLAYER:
-			SCMovePlayerDelegate.ExecuteIfBound(packet);
+			m_playerController->SCMovePlayerDelegate.ExecuteIfBound(packet);
 			break;
 		}
 
@@ -39,22 +36,8 @@ void PacketManager::ProcessPacket(char* packet, size_t length)
 	}
 }
 
-void PacketManager::SCLoginInfoHandler(char* packet)
+void PacketManager::SetPlayerController(AMyPlayerController* playerController)
 {
-	SC_LOGIN_INFO_PACKET* p = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet);
-	uint32 id = p->id;
-	uint32 x = p->x;
-	uint32 y = p->y;
-	uint32 z = p->z;
-	UE_LOG(LogTemp, Log, TEXT("[Login Info] ID : %d , X : %d, Y : %d, Z: %d"), id, x, y, z);
-}
-
-void PacketManager::SCMovePlayerHandler(char* packet)
-{
-	SC_MOVE_PLAYER_PACKET* p = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(packet);
-	uint32 id = p->id;
-	uint32 x = p->x;
-	uint32 y = p->y;
-	uint32 z = p->z;
-	UE_LOG(LogTemp, Log, TEXT("[Move] ID : %d , X : %d, Y : %d, Z: %d"), id, x, y, z);
+	if (playerController)
+		m_playerController = playerController;
 }

@@ -5,7 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "ClientSocket.h"
+#include "../../../Common/protocol.h"
 #include "MyPlayerController.generated.h"
+
+DECLARE_DELEGATE_OneParam(FD_HandlerDelegate, char*);
 
 /**
  * 
@@ -20,6 +23,15 @@ public:
 	
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
+
+	void EnterPlayer(uint32 id, FVector location, FRotator rotator);
+
+	void SCLoginInfoHandler(char* packet);
+	void SCMovePlayerHandler(char* packet);
+
+public:
+	FD_HandlerDelegate SCLoginDelegate;
+	FD_HandlerDelegate SCMovePlayerDelegate;
 
 public:
 	ClientSocket* m_socket;

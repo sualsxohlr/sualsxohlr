@@ -11,6 +11,7 @@
 
 // #include "ohlrxsuals.h"
 #include "PacketManager.h"
+#include "MyPlayerController.h"
 
 ClientSocket::ClientSocket()
 {

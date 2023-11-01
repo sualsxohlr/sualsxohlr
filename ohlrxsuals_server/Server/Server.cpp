@@ -125,7 +125,6 @@ void Server::ProcessAccept()
 
 void Server::ProcessRecv(EXP_OVER* exp_over, ULONG_PTR num_bytes, int client_id)
 {
-	cout << "Received" << endl;
 	shared_ptr<Session> session = SessionManager::GetInstance()->FindClient(client_id);
 	PacketManager::GetInstance()->ProcessPacket(session->shared_from_this(), exp_over->sendbuf, num_bytes);
 	session->RegisterRecv();

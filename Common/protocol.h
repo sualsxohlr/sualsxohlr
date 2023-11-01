@@ -36,14 +36,16 @@ struct SC_LOGIN_INFO_PACKET {
 	unsigned char size;
 	PacketType type;
 	short	id;
-	short	x, y, z;
+	float	x, y, z;
+	float	yaw, pitch, roll;
 };
 
 struct SC_MOVE_PLAYER_PACKET {
 	unsigned char size;
 	PacketType type;
 	short	id;
-	short	x, y, z;
+	float	x, y, z;
+	float	yaw, pitch, roll;
 };
 
 
